@@ -1,0 +1,84 @@
+{
+  "chunk_id": "IEC_61076_8_103_2023::6.3.1",
+  "document_id": "IEC_61076_8_103_2023",
+  "clause_id": "6.3.1",
+  "title": "Mechanical operation",
+  "parent_id": "6.3",
+  "content": [
+    {
+      "type": "paragraph",
+      "text": "Conditions: IEC 60512-9-1, Test 9a."
+    },
+    {
+      "type": "paragraph",
+      "text": "Standard atmospheric conditions, mated connectors."
+    },
+    {
+      "type": "paragraph",
+      "text": "Rate of insertion and withdrawal operation: 10 mm/s max."
+    },
+    {
+      "type": "paragraph",
+      "text": "Operating cycles: 500 cycles."
+    },
+    {
+      "type": "paragraph",
+      "text": "Requirements: the appearance, contact resistance (6.2.5), insulation resistance (6.2.6), voltage  proof (6.2.2), polarization and keying method (6.3.6) and IP degree of protection (6.4.4) shall  meet the requirements of this specification after test."
+    },
+    {
+      "type": "paragraph",
+      "text": "Conditions: IEC 60512-9-1, Essai 9a."
+    },
+    {
+      "type": "paragraph",
+      "text": "Conditions atmosphériques normales, connecteurs accouplés."
+    },
+    {
+      "type": "paragraph",
+      "text": "Taux de l'opération d'insertion et d'extraction: 10 mm/s max."
+    },
+    {
+      "type": "paragraph",
+      "text": "Nombre de cycles de manœuvre: 500 cycles."
+    },
+    {
+      "type": "paragraph",
+      "text": "Exigences: l'aspect, la résistance de contact (6.2.5), la résistance d'isolement (6.2.6), la tension  de tenue (6.2.2), la méthode de détrompage et de codage (6.3.6) ainsi que le degré de  protection IP (6.4.4) doivent satisfaire aux exigences de la présente spécification après essai."
+    }
+  ],
+  "tables": [],
+  "figures": [],
+  "requirements": [
+    {
+      "type": "mandatory",
+      "keyword": "shall",
+      "text": "Requirements: the appearance, contact resistance (6.2.5), insulation resistance (6.2.6), voltage  proof (6.2.2), polarization and keying method (6.3.6) and IP degree of protection (6.4.4) shall  meet the requirements of this specification after test."
+    }
+  ],
+  "references": {
+    "internal_raw": [
+      "1",
+      "10",
+      "500",
+      "6.2.2",
+      "6.2.5",
+      "6.2.6",
+      "6.3.6",
+      "6.4.4",
+      "60512",
+      "9"
+    ],
+    "internal_resolved": [
+      "IEC_61076_8_103_2023::1",
+      "IEC_61076_8_103_2023::6.2.2",
+      "IEC_61076_8_103_2023::6.2.5",
+      "IEC_61076_8_103_2023::6.2.6",
+      "IEC_61076_8_103_2023::6.3.6",
+      "IEC_61076_8_103_2023::6.4.4"
+    ],
+    "standards": [
+      "IEC 60512-9-1"
+    ]
+  },
+  "children_ids": []
+}

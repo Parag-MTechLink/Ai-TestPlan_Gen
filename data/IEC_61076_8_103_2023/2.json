@@ -1,0 +1,509 @@
+{
+  "chunk_id": "IEC_61076_8_103_2023::2",
+  "document_id": "IEC_61076_8_103_2023",
+  "clause_id": "2",
+  "title": "Normative references",
+  "parent_id": null,
+  "content": [
+    {
+      "type": "paragraph",
+      "text": "The following documents are referred to in the text in such a way that some or all of their content  constitutes requirements of this document. For dated references, only the edition cited applies.  For undated references, the latest edition of the referenced document (including any  amendments) applies."
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60050-581, International Electrotechnical Vocabulary (IEV) – Part 581: Electromechanical  components for electronic equipment"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60068-1, Environmental testing – Part 1: General and guidance"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC60068-2-60, Environmental testing – Part 2-60: Tests – Test Ke: Flowing mixed gas  corrosion test"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60228, Conductors of insulated cables"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-2, Solderless connections – Part 2: Crimped connections – General requirements,  test methods and practical guidance"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-3, Solderless connections – Part 3: Accessible insulation displacement (ID)  connections – General requirements, test methods and practical guidance"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-4, Solderless connections – Part 4: Non-accessible insulation displacement (ID)  connections – General requirements, test methods and practical guidance"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-5, Solderless connections – Part 5: Press-in connections – General requirements,  test methods and practical guidance"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-6, Solderless connections – Part 6: Insulation piercing connections – General  requirements, test methods and practical guidance"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-7, Solderless connections – Part 7: Spring clamp connections – General  requirements, test methods and practical guidance"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-1-1, Connectors for electronic equipment-Tests and measurements – Part 1-1:  General examination – Test 1a: Visual examination"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-1-2, Connectors for electronic equipment-Tests and measurements  Part 1-2:  General examination – Test 1b: Examination of dimension and mass"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-2-1, Connectors for electronic equipment  Tests and measurements  Part 2-1:  Electrical continuity and contact resistance tests – Test 2a: Contact resistance – Millivolt level  method"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-2-5, Connectors for electronic equipment  Tests and measurements  Part 2-5:  Electrical continuity and contact resistance tests – Test 2e: Contact disturbance"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-3-1, Connectors for electronic equipment  Tests and measurements  Part 3-1:  Insulation tests – Test 3a: Insulation resistance"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-4-1, Connectors for electronic equipment  Tests and measurements  Part 4-1:  Voltage stress tests – Test 4a: Voltage proof"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-5-2, Connectors for electronic equipment  Tests and measurements  Part 5-2:  Current-carrying capacity tests – Test 5b: Current-temperature derating"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-6-3, Connectors for electronic equipment  Tests and measurements  Part 6-3:  Dynamic stress tests – Test 6c: Shock"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-6-4, Connectors for electronic equipment  Tests and measurements  Part 6-4:  Dynamic stress tests – Test 6d: Vibration (sinusoidal)"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-7-1, Connectors for electronic equipment  Tests and measurements  Part 7-1:  Impact tests (free connectors) – Test 7a: Free fall (repeated)"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-9-1, Connectors for electronic equipment  Tests and measurements  Part 9-1:  Endurance tests – Test 9a: Mechanical operation"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-9-2, Connectors for electronic equipment  Tests and measurements  Part 9-2:  Endurance tests – Test 9b: Electrical load and temperature"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-1, Connectors for electrical and electronic equipment  Tests and measurements  – Part 11-1: Climatic tests – Test 11a - Climatic sequence"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-3, Connectors for electronic equipment  Tests and measurements  Part 11-3:  Climatic tests – Test 11c: Damp heat, steady state"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-4, Connectors for electronic equipment  Tests and measurements  Part 11-4:  Climatic tests – Test 11d: Rapid change of temperature"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-6, Connectors for electronic equipment  Tests and measurements  Part 11-6:  Climatic tests – Test 11f: Corrosion, salt mist"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-7, Connectors for electronic equipment  Tests and measurements  Part 11-7:  Climatic tests – Test 11g: Flowing mixed gas corrosion test"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-9, Connectors for electronic equipment  Tests and measurements  Part 11-9:  Climatic tests – Test 11i: Dry heat"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-10, Connectors for electronic equipment  Tests and measurements  Part 11-10:  Climatic tests – Test 11j: Cold"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-11-11, Connectors for electronic equipment – Tests and measurements – Part 11-11:  Climatic tests – Test 11k: Low air pressure"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-11-12, Connectors for electronic equipment – Tests and measurements – Part 11-12:  Climatic tests – Test 11m: Damp heat, cyclic"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-13-1, Connectors for electronic equipment – Tests and measurements – Part 13-1:  Mechanical operation tests – Test 13a: Engaging and separating forces"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-13-5, Connectors for electronic equipment – Tests and measurements – Part 13-5:  Mechanical operation tests – Test 13e: Polarizing and keying method"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-15-1, Connectors for electronic equipment – Tests and measurements – Part 15-1:  Connector tests (mechanical) – Test 15a: Contact retention in insert"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-15-6, Connectors for electronic equipment – Tests and measurements – Part 15-6:  Connector tests (mechanical) – Test 15f: Effectiveness of connector coupling devices"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-16-5, Connectors for electronic equipment – Tests and measurements – Part 16-5:  Mechanical tests on contacts and terminations – Test 16e: Gauge retention force (resilient  contacts)"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-20-3, Connectors for electronic equipment – Tests and measurements – Part 20-3:  Fire hazard tests – Test 20c: Flammability, glow-wire"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60529:1989, Degrees of protection provided by enclosures (IP Code)"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60529:1989/AMD1:1999 IEC 60529:1989/AMD2:2013"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60695-2-11:2021, Fire hazard testing – Part 2-11: Glowing/hot-wire based test methods –  Glow-wire flammability test method for end-products (GWEPT)"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60999-1, Connecting devices – Electrical copper conductors – Safety requirements for  screw-type and screwless-type clamping units – Part 1: General requirements and particular  requirements for clamping units for conductors from 0,2 mm2 up to 35 mm2 (included)"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 61076-1:2006, Connectors for electronic equipment – Product requirements – Part 1:  Generic specification IEC 61076-1:2006/AMD1:2019"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 61984:2008, Connectors – Safety requirements and tests"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 62430:2019, Environmentally conscious design (ECD) – Principles, requirements and  guidance"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC Guide 109, Environmental aspects – Inclusion in electrotechnical product standards"
+    },
+    {
+      "type": "paragraph",
+      "text": "ISO 6508-1, Metallic materials – Rockwell hardness test – Part 1: Test method"
+    },
+    {
+      "type": "paragraph",
+      "text": "ISO 11469, Plastics - Generic identification and marking of plastics products"
+    },
+    {
+      "type": "paragraph",
+      "text": "ISO 21920-1: 2021, Geometrical product specifications (GPS) – Surface texture: Profile – Part 1:  Indication of surface texture"
+    },
+    {
+      "type": "paragraph",
+      "text": "Les documents suivants sont cités dans le texte de sorte qu'ils constituent, pour tout ou partie  de leur contenu, des exigences du présent document. Pour les références datées, seule  l'édition citée s'applique. Pour les références non datées, la dernière édition du document de  référence s'applique (y compris les éventuels amendements)."
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60050-581, Vocabulaire Electrotechnique International (IEV) – Partie 581: Composants  électromécaniques pour équipements électroniques"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60068-1, Essais d'environnement – Partie 1: Généralités et lignes directrices"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60068-2-60, Essais d'environnement – Partie 2-60: Essais – Essai Ke: Essai de corrosion  dans un flux de mélange de gaz"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60228, Ames des câbles isolés"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-2, Connexions sans soudure – Partie 2: Connexions serties – Exigences générales,  méthodes d'essai et guide pratique"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-3, Connexions sans soudure – Partie 3: Connexions autodénudantes accessibles –  Règles générales, méthodes d'essai et guide pratique"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-4, Connexions sans soudure – Partie 4: Connexions autodénudantes (CAD) non  accessibles sans soudure – Règles générales, méthodes d'essai et guide pratique"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-5, Connexions sans soudure – Partie 5: Connexions insérées à force – Exigences  générales, méthodes d'essai et guide pratique"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-6, Connexions sans soudure – Partie 6: Connexions à percement d'isolant –  Exigences générales, méthodes d'essai et guide pratique"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60352-7, Connexions sans soudure – Partie 7: Connexions à ressort – Règles générales,  méthodes d'essai et guide pratique"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-1-1, Connecteurs pour équipements électroniques  Essais et mesures  Partie 1-1:  Examen général – Essai 1a: Examen visuel"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-1-2, Connecteurs pour équipements électroniques  Essais et mesures  Partie 1-2:  Examen général – Essai 1b: Examen de dimension et masse"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-2-1, Connecteurs pour équipements électroniques  Essais et mesures  Partie 2-1:  Essais de continuité électrique et de résistance de contact – Essai 2a: Résistance de contact – Méthode du niveau des millivolts"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-2-5, Connecteurs pour équipements électroniques  Essais et mesures  Partie 2-5: Essais de continuité électrique et de résistance de contact – Essai 2e: Perturbation de contact"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-3-1, Connecteurs pour équipements électroniques  Essais et mesures  Partie 3-1:  Essais d'isolement – Essai 3a: Résistance d'isolement"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-4-1, Connecteurs pour équipements électroniques  Essais et mesures  Partie 4-1:  Essais de contrainte diélectrique – Essai 4a: Tension de tenue"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-5-2, Connecteurs pour équipements électroniques  Essais et mesures  Partie 5-2: Essais de courant limite – Essai 5b: Taux de réduction de l'intensité en fonction de la  température"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-6-3, Connecteurs pour équipements électroniques  Essais et mesures  Partie 6-3:  Essais de contraintes dynamiques – Essai 6c: Chocs"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-6-4, Connecteurs pour équipements électroniques  Essais et mesures  Partie 6-4:  Essais de contraintes dynamiques – Essai 6d: Vibrations (sinusoïdales)"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-7-1, Connecteurs pour équipements électroniques  Essais et mesures  Partie 7-1:  Essais d'impact (fiches) – Essai 7a: Chute libre (essai répété)"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-9-1, Connecteurs pour équipements électroniques  Essais et mesures  Partie 9-1:  Essais d'endurance – Essai 9a: Fonctionnement mécanique"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-9-2, Connecteurs pour équipements électroniques  Essais et mesures  Partie 9-2:  Essais d'endurance – Essai 9b: Charge électrique et température"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-1, Connecteurs pour équipements électriques et électroniques  Essais et  mesures – Partie 11-1: Essais climatiques – Essai 11a – Séquence climatique"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-3, Connecteurs pour équipements électroniques  Essais et mesures  Partie  11-3: Essais climatiques – Essai 11c: Essai continu de chaleur humide"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-4, Connecteurs pour équipements électroniques  Essais et mesures   Partie 11-4: Essais climatiques – Essai 11d: Variations rapides de température"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-6, Connecteurs pour équipements électroniques  Essais et mesures   Partie 11-6: Essais climatiques – Essai 11f: Corrosion, brouillard salin"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-7, Connecteurs pour équipements électroniques  Essais et mesures   Partie 11-7: Essais climatiques – Essai 11g: Essai de corrosion dans un flux de mélange de  gaz"
+    },
+    {
+      "type": "list_item",
+      "text": "IEC 60512-11-9, Connecteurs pour équipements électroniques  Essais et mesures   Partie 11-9: Essais climatiques – Essai 11i: Chaleur sèche"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-11-10, Connecteurs pour équipements électroniques – Essais et mesures –  Partie 11-10: Essais climatiques – Essai 11j: Froid"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-11-11, Connecteurs pour équipements électroniques – Essais et mesures –  Partie 11-11: Essais climatiques – Essai 11k: Basse pression atmosphérique"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-11-12, Connecteurs pour équipements électroniques – Essais et mesures –  Partie 11-12: Essais climatiques – Essai 11m: Essai cyclique de chaleur humide"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-13-1, Connecteurs pour équipements électroniques – Essais et mesures –  Partie 13-1: Essais de fonctionnement mécanique – Essai 13a: Forces d'accouplement et de  désaccouplement"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-13-5, Connecteurs pour équipements électroniques – Essais et mesures –  Partie 13-5: Essais de fonctionnement mécanique – Essai 13e: Méthode de polarisation et de  codage"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-15-1, Connecteurs pour équipements électroniques – Essais et mesures –  Partie 15-1: Essais (mécaniques) des connecteurs – Essai 15a: Rétention des contacts dans  l'isolant"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-15-6, Connecteurs pour équipements électroniques – Essais et mesures –  Partie 15-6: Essais (mécaniques) des connecteurs – Essai 15f: Efficacité des dispositifs  d'accouplement des connecteurs"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-16-5, Connecteurs pour équipements électroniques – Essais et mesures –  Partie 16-5: Essais mécaniques des contacts et des sorties – Essai 16e: Force de rétention du  calibre (contacts élastiques)"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60512-20-3, Connecteurs pour équipements électroniques – Essais et mesures – Partie  20-3: Essais relatifs aux risques du feu – Essai 20c: Inflammabilité, fil incandescent"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60529:1989, Degrés de protection procurés par les enveloppes (Code IP)"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60529:1989/AMD1:1999 IEC 60529:1989/AMD2:2013"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60695-2-11:2021, Essais relatifs aux risques du feu – Partie 2-11: Essais au fil  incandescent/chauffant – Méthode d'essai d'inflammabilité pour produits finis (GWEPT)"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 60999-1, Dispositifs de connexion – Conducteurs électriques en cuivre – Prescriptions de  sécurité pour organes de serrage à vis et sans vis – Partie 1: Prescriptions générales et  particulières pour les organes de serrage pour les conducteurs de 0,2 mm2 à 35 mm2 (inclus)"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 61076-1:2006, Connecteurs pour équipements électroniques –Exigences de produit –  Partie 1: Spécification générique IEC 61076-1:2006/AMD1:2019"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 61984:2008, Connecteurs – Exigences de sécurité et essais"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC 62430:2019, Écoconception (ECD) – Principes, exigences et recommandations"
+    },
+    {
+      "type": "paragraph",
+      "text": "IEC Guide 109, Aspects liés à l'environnement – Prise en compte dans les normes  électrotechniques de produits"
+    },
+    {
+      "type": "paragraph",
+      "text": "ISO 6508-1:2005, Matériaux métalliques – Essai de dureté Rockwell – Partie 1: Méthode  d'essai"
+    },
+    {
+      "type": "paragraph",
+      "text": "ISO 11469, Plastiques – Identification générique et marquage des produits en matière plastique"
+    },
+    {
+      "type": "paragraph",
+      "text": "ISO 21920-1: 2021, Spécification géométrique des produits (GPS) – Etat de surface: Méthode  du profil – Partie 1: Indication des états de surface"
+    }
+  ],
+  "tables": [],
+  "figures": [],
+  "requirements": [],
+  "references": {
+    "internal_raw": [
+      "0",
+      "1",
+      "10",
+      "109",
+      "11",
+      "11469",
+      "12",
+      "13",
+      "15",
+      "16",
+      "1989",
+      "1999",
+      "2",
+      "20",
+      "2005",
+      "2006",
+      "2008",
+      "2013",
+      "2019",
+      "2021",
+      "21920",
+      "3",
+      "35",
+      "4",
+      "5",
+      "581",
+      "6",
+      "60",
+      "60050",
+      "60068",
+      "60228",
+      "60352",
+      "60512",
+      "60529",
+      "60695",
+      "60999",
+      "61076",
+      "61984",
+      "62430",
+      "6508",
+      "7",
+      "9"
+    ],
+    "internal_resolved": [
+      "IEC_61076_8_103_2023::1",
+      "IEC_61076_8_103_2023::2",
+      "IEC_61076_8_103_2023::3",
+      "IEC_61076_8_103_2023::4",
+      "IEC_61076_8_103_2023::5",
+      "IEC_61076_8_103_2023::6",
+      "IEC_61076_8_103_2023::7"
+    ],
+    "standards": [
+      "IEC 60050-581",
+      "IEC 60068-1",
+      "IEC 60068-2-60",
+      "IEC 60228",
+      "IEC 60352-2",
+      "IEC 60352-3",
+      "IEC 60352-4",
+      "IEC 60352-5",
+      "IEC 60352-6",
+      "IEC 60352-7",
+      "IEC 60512-1-1",
+      "IEC 60512-1-2",
+      "IEC 60512-11-1",
+      "IEC 60512-11-10",
+      "IEC 60512-11-11",
+      "IEC 60512-11-12",
+      "IEC 60512-11-3",
+      "IEC 60512-11-4",
+      "IEC 60512-11-6",
+      "IEC 60512-11-7",
+      "IEC 60512-11-9",
+      "IEC 60512-13-1",
+      "IEC 60512-13-5",
+      "IEC 60512-15-1",
+      "IEC 60512-15-6",
+      "IEC 60512-16-5",
+      "IEC 60512-2-1",
+      "IEC 60512-2-5",
+      "IEC 60512-20-3",
+      "IEC 60512-3-1",
+      "IEC 60512-4-1",
+      "IEC 60512-5-2",
+      "IEC 60512-6-3",
+      "IEC 60512-6-4",
+      "IEC 60512-7-1",
+      "IEC 60512-9-1",
+      "IEC 60512-9-2",
+      "IEC 60529:1989",
+      "IEC 60695-2-11:2021",
+      "IEC 60999-1",
+      "IEC 61076-1:2006",
+      "IEC 61984:2008",
+      "IEC 62430:2019",
+      "ISO 11469",
+      "ISO 21920-1: 2021",
+      "ISO 6508-1",
+      "ISO 6508-1:2005"
+    ]
+  },
+  "children_ids": []
+}

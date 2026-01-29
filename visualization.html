@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #0a0e27;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            max-width: 300px;
+        }
+
+        #controls h2 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        #controls label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        #controls select, #controls input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        #stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            min-width: 200px;
+        }
+
+        #stats h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        #stats p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        #stats strong {
+            color: #333;
+        }
+
+        #graph-container {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #node-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            display: none;
+        }
+
+        #node-info h4 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        #node-info p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .legend h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .legend-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+
+        .node {
+            cursor: pointer;
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+
+        .node:hover {
+            stroke: #ffd700;
+            stroke-width: 3px;
+        }
+
+        .node-label {
+            font-size: 10px;
+            pointer-events: none;
+            fill: #fff;
+            text-anchor: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h2>🔍 Controls</h2>
+        <label for="node-type-filter">Filter by Type:</label>
+        <select id="node-type-filter">
+            <option value="all">All Types</option>
+            <option value="Standard">Standard</option>
+            <option value="Clause">Clause</option>
+            <option value="Requirement">Requirement</option>
+            <option value="ExternalStandard">External Standard</option>
+        </select>
+
+        <label for="document-filter">Filter by Document:</label>
+        <select id="document-filter">
+            <option value="all">All Documents</option>
+        </select>
+
+        <label for="search-node">Search Node:</label>
+        <input type="text" id="search-node" placeholder="Enter node ID or label...">
+    </div>
+
+    <div id="stats">
+        <h3>📊 Graph Statistics</h3>
+        <p><strong>Nodes:</strong> <span id="node-count">0</span></p>
+        <p><strong>Edges:</strong> <span id="edge-count">0</span></p>
+        <p><strong>Standards:</strong> <span id="standard-count">0</span></p>
+        <p><strong>Clauses:</strong> <span id="clause-count">0</span></p>
+        <p><strong>Requirements:</strong> <span id="requirement-count">0</span></p>
+    </div>
+
+    <div id="node-info">
+        <h4>Node Details</h4>
+        <div id="node-details"></div>
+    </div>
+
+    <div class="legend">
+        <h4>Node Types</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #FF6B6B;"></div>
+            <div class="legend-label">Standard</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #4ECDC4;"></div>
+            <div class="legend-label">Clause</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #45B7D1;"></div>
+            <div class="legend-label">Requirement</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #96CEB4;"></div>
+            <div class="legend-label">External Standard</div>
+        </div>
+    </div>
+
+    <svg id="graph-container"></svg>
+
+    <script>
+        // Fetch graph data from API
+        fetch('http://localhost:8000/api/v1/visualization/graph-data')
+            .then(response => response.json())
+            .then(data => {
+                renderGraph(data);
+                updateStats(data);
+                populateDocumentFilter(data);
+            })
+            .catch(error => {
+                console.error('Error fetching graph data:', error);
+                alert('Error loading graph data. Make sure the API server is running.');
+            });
+
+        function renderGraph(graphData) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            const svg = d3.select('#graph-container')
+                .attr('width', width)
+                .attr('height', height);
+
+            // Clear existing content
+            svg.selectAll('*').remove();
+
+            // Create zoom behavior
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 10])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+
+            svg.call(zoom);
+
+            const g = svg.append('g');
+
+            // Store original data
+            let allNodes = graphData.nodes;
+            let allEdges = graphData.edges;
+
+            function updateVisualization(filteredNodes, filteredEdges) {
+                // Clear previous
+                g.selectAll('*').remove();
+
+                // Create force simulation
+                const simulation = d3.forceSimulation(filteredNodes)
+                    .force('link', d3.forceLink(filteredEdges)
+                        .id(d => d.id)
+                        .distance(100))
+                    .force('charge', d3.forceManyBody().strength(-300))
+                    .force('center', d3.forceCenter(width / 2, height / 2))
+                    .force('collision', d3.forceCollide().radius(d => d.size + 5));
+
+                // Create links
+                const link = g.append('g')
+                    .selectAll('line')
+                    .data(filteredEdges)
+                    .enter()
+                    .append('line')
+                    .attr('class', 'link')
+                    .attr('stroke-width', d => Math.sqrt(d.weight || 1));
+
+                // Create nodes
+                const node = g.append('g')
+                    .selectAll('circle')
+                    .data(filteredNodes)
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'node')
+                    .attr('r', d => d.size)
+                    .attr('fill', d => d.color)
+                    .call(d3.drag()
+                        .on('start', dragstarted)
+                        .on('drag', dragged)
+                        .on('end', dragended))
+                    .on('click', (event, d) => showNodeInfo(d));
+
+                // Add labels for important nodes
+                const label = g.append('g')
+                    .selectAll('text')
+                    .data(filteredNodes.filter(d => d.type === 'Standard' || d.type === 'ExternalStandard'))
+                    .enter()
+                    .append('text')
+                    .attr('class', 'node-label')
+                    .attr('dy', -15)
+                    .text(d => d.label);
+
+                // Update positions on each tick
+                simulation.on('tick', () => {
+                    link
+                        .attr('x1', d => d.source.x)
+                        .attr('y1', d => d.source.y)
+                        .attr('x2', d => d.target.x)
+                        .attr('y2', d => d.target.y);
+
+                    node
+                        .attr('cx', d => d.x)
+                        .attr('cy', d => d.y);
+
+                    label
+                        .attr('x', d => d.x)
+                        .attr('y', d => d.y);
+                });
+
+                function dragstarted(event, d) {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+
+                function dragged(event, d) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                }
+
+                function dragended(event, d) {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                }
+            }
+
+            // Initial render
+            updateVisualization(allNodes, allEdges);
+
+            // Filter controls
+            document.getElementById('node-type-filter').addEventListener('change', applyFilters);
+            document.getElementById('document-filter').addEventListener('change', applyFilters);
+            document.getElementById('search-node').addEventListener('input', applyFilters);
+
+            function applyFilters() {
+                const typeFilter = document.getElementById('node-type-filter').value;
+                const docFilter = document.getElementById('document-filter').value;
+                const searchText = document.getElementById('search-node').value.toLowerCase();
+
+                let filteredNodes = allNodes.filter(node => {
+                    const typeMatch = typeFilter === 'all' || node.type === typeFilter;
+                    const docMatch = docFilter === 'all' || node.document_id === docFilter;
+                    const searchMatch = searchText === '' ||
+                        node.id.toLowerCase().includes(searchText) ||
+                        node.label.toLowerCase().includes(searchText);
+                    return typeMatch && docMatch && searchMatch;
+                });
+
+                const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+                const filteredEdges = allEdges.filter(edge =>
+                    filteredNodeIds.has(edge.source.id || edge.source) &&
+                    filteredNodeIds.has(edge.target.id || edge.target)
+                );
+
+                updateVisualization(filteredNodes, filteredEdges);
+                updateStats({nodes: filteredNodes, edges: filteredEdges});
+            }
+        }
+
+        function showNodeInfo(node) {
+            const infoDiv = document.getElementById('node-info');
+            const detailsDiv = document.getElementById('node-details');
+
+            let html = `
+                <p><strong>ID:</strong> ${node.id}</p>
+                <p><strong>Label:</strong> ${node.label}</p>
+                <p><strong>Type:</strong> ${node.type}</p>
+            `;
+
+            if (node.document_id) {
+                html += `<p><strong>Document:</strong> ${node.document_id}</p>`;
+            }
+            if (node.clause_id) {
+                html += `<p><strong>Clause ID:</strong> ${node.clause_id}</p>`;
+            }
+
+            detailsDiv.innerHTML = html;
+            infoDiv.style.display = 'block';
+        }
+
+        function updateStats(data) {
+            document.getElementById('node-count').textContent = data.nodes.length;
+            document.getElementById('edge-count').textContent = data.edges.length;
+
+            const standards = data.nodes.filter(n => n.type === 'Standard').length;
+            const clauses = data.nodes.filter(n => n.type === 'Clause').length;
+            const requirements = data.nodes.filter(n => n.type === 'Requirement').length;
+
+            document.getElementById('standard-count').textContent = standards;
+            document.getElementById('clause-count').textContent = clauses;
+            document.getElementById('requirement-count').textContent = requirements;
+        }
+
+        function populateDocumentFilter(data) {
+            const documents = new Set(data.nodes
+                .filter(n => n.document_id)
+                .map(n => n.document_id));
+
+            const select = document.getElementById('document-filter');
+            documents.forEach(doc => {
+                const option = document.createElement('option');
+                option.value = doc;
+                option.textContent = doc;
+                select.appendChild(option);
+            });
+        }
+    </script>
+</body>
+</html>

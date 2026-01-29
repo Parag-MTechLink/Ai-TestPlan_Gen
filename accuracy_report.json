@@ -1,0 +1,43 @@
+{
+  "overall_accuracy": 70.19378427787935,
+  "grade": "B  (Good)",
+  "components": {
+    "ingestion": {
+      "total_files": 547,
+      "sample_size": 20,
+      "field_completeness": 100.0,
+      "requirements_sampled": 33,
+      "score": 100.0
+    },
+    "graph": {
+      "node_count": 100,
+      "edge_count": 438,
+      "node_coverage": 18.281535648994517,
+      "edge_density": 4.38,
+      "node_types": {
+        "Standard": 1,
+        "Clause": 50,
+        "Requirement": 49
+      },
+      "score": 50.96892138939671
+    },
+    "retrieval": {
+      "precision": 100.0,
+      "recall": 100.0,
+      "keyword_match": 33.33333333333333,
+      "f1_score": 100.0,
+      "score": 100.0
+    },
+    "semantic": {
+      "semantic_similarity": 0.0,
+      "score": 0.0
+    },
+    "e2e": {
+      "retrieval_success": true,
+      "retrieval_count": 1,
+      "dvp_success": true,
+      "score": 100
+    }
+  },
+  "timestamp": "C:\\Users\\Bramha.nimbalkar\\Desktop\\knowledge graph"
+}

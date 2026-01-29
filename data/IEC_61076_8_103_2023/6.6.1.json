@@ -1,0 +1,36 @@
+{
+  "chunk_id": "IEC_61076_8_103_2023::6.6.1",
+  "document_id": "IEC_61076_8_103_2023",
+  "clause_id": "6.6.1",
+  "title": "Marking of insulation material (plastic)",
+  "parent_id": "6.6",
+  "content": [
+    {
+      "type": "paragraph",
+      "text": "If applicable and possible, all plastic material should be marked according to ISO 11469 to ease  recycling."
+    },
+    {
+      "type": "paragraph",
+      "text": "Le cas échéant et si possible, il convient de marquer tous les matériaux en plastique  conformément à l'ISO 11469 pour en faciliter le recyclage."
+    }
+  ],
+  "tables": [],
+  "figures": [],
+  "requirements": [
+    {
+      "type": "recommendation",
+      "keyword": "should",
+      "text": "If applicable and possible, all plastic material should be marked according to ISO 11469 to ease  recycling."
+    }
+  ],
+  "references": {
+    "internal_raw": [
+      "11469"
+    ],
+    "internal_resolved": [],
+    "standards": [
+      "ISO 11469"
+    ]
+  },
+  "children_ids": []
+}
