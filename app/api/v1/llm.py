@@ -7,12 +7,16 @@ from typing import List, Dict, Any
 import uuid
 from datetime import datetime
 import json
+from pathlib import Path
 
 from app.models.api_models import (
     LLMGenerationRequest,
     LLMGenerationResponse,
     JobStatus,
-    JobStatusResponse
+    LLMGenerationResponse,
+    JobStatus,
+    JobStatusResponse,
+    RetrievalQueryRequest
 )
 from app.config import settings
 from loguru import logger
@@ -90,6 +94,51 @@ Generate a realistic and detailed test procedure that follows automotive industr
 
     return prompt
 
+def generate_batch_test_procedure_prompt(requirements: List[Dict[str, Any]],
+                                       component_profile: Dict[str, Any]) -> str:
+    """
+    Generate prompt for BATCH test procedure creation
+    """
+    req_texts = []
+    for i, req in enumerate(requirements):
+        text = req.get('text', '')[:500] # Truncate massive requirements
+        req_id = req.get('requirement_id', req.get('node_id', f'REQ_{i}'))
+        req_texts.append(f"Requirement {i+1} (ID: {req_id}): {text}")
+        
+    compiled_requirements = "\n\n".join(req_texts)
+
+    prompt = f"""You are a test engineer creating a Product Testing Plan (PTP).
+
+Component: {component_profile.get('name')}
+Type: {component_profile.get('type')}
+Specs: {json.dumps(component_profile.get('specifications', {}), indent=2)}
+
+Requirements to Test:
+{compiled_requirements}
+
+Task:
+Generate a list of {len(requirements)} test procedures (one for each requirement) in valid JSON format.
+The output must be a JSON Array of objects.
+
+Each object must have:
+- "test_name"
+- "test_description"
+- "detailed_procedure" (List of strings)
+- "acceptance_criteria"
+- "source_requirement" (Must match the ID provided above)
+- "traceability": {{ "requirement_id": "...", "source_standard": "..." }}
+
+Example Response Format:
+[
+  {{
+    "test_name": "...",
+    "source_requirement": "REQ_001",
+    ...
+  }}
+]
+"""
+    return prompt
+
 async def process_llm_generation(job_id: str, request: LLMGenerationRequest):
     """
     Background task for LLM generation
@@ -100,109 +149,176 @@ async def process_llm_generation(job_id: str, request: LLMGenerationRequest):
 
         client = get_llm_client()
 
-        test_procedures = []
-        acceptance_criteria = []
-        total_tokens = 0
+        # Prepare batch prompt
+        results_to_process = request.retrieved_context[:10]  # Limit context
+        
+        prompt = generate_batch_test_procedure_prompt(
+            results_to_process,
+            request.component_profile.model_dump()
+        )
 
-        # Process top results
-        results_to_process = request.retrieved_context[:10]  # Limit for cost control
+        llm_jobs[job_id]['current_step'] = 'Generating test procedures (Batch)...'
+        
+        max_retries = 5
+        retry_delay = 10
+        
+        content = ""
+        tokens = 0
 
-        llm_jobs[job_id]['current_step'] = f'Generating test procedures (0/{len(results_to_process)})'
-
-        for idx, result in enumerate(results_to_process):
+        for attempt in range(max_retries):
             try:
-                # Generate prompt
-                prompt = generate_test_procedure_prompt(
-                    result,
-                    request.component_profile.model_dump()
-                )
-
                 if settings.llm_provider == "gemini":
-                    # Call Gemini using the new SDK
-                    # client is the genai.Client returned by get_llm_client()
-                    full_prompt = f"System: You are an expert automotive test engineer. Always respond with valid JSON only.\n\nUser: {prompt}"
+                    full_prompt = f"System: You are an expert automotive test engineer. Return a JSON List of objects only.\n\nUser: {prompt}"
                     
                     response = client.models.generate_content(
                         model=settings.gemini_model,
                         contents=full_prompt,
                         config={
                             'temperature': settings.openai_temperature,
-                            'max_output_tokens': settings.openai_max_tokens,
+                            'max_output_tokens': 8192, # Increased for batch
                         }
                     )
                     content = response.text
                     tokens = getattr(response, 'usage_metadata', None).total_token_count if getattr(response, 'usage_metadata', None) else 0
                 else:
-                    # Call OpenAI (local model)
                     response = client.chat.completions.create(
                         model=settings.openai_model,
                         messages=[
-                            {"role": "system", "content": "You are an expert automotive test engineer. Always respond with valid JSON only."},
+                            {"role": "system", "content": "You are an expert automotive test engineer. Return a JSON List of objects only."},
                             {"role": "user", "content": prompt}
                         ],
                         temperature=settings.openai_temperature,
-                        max_tokens=settings.openai_max_tokens
+                        max_tokens=8192
                     )
                     content = response.choices[0].message.content
                     tokens = response.usage.total_tokens
-                # Try to extract JSON from the response
-                try:
-                    procedure_data = json.loads(content)
-                except json.JSONDecodeError:
-                    # Try to find JSON in the response
-                    import re
-                    json_match = re.search(r'\{[\s\S]*\}', content)
-                    if json_match:
-                        procedure_data = json.loads(json_match.group())
-                    else:
-                        logger.warning(f"Could not parse JSON from LLM response: {content[:200]}")
-                        continue
+                
+                break
+                
+            except Exception as e:
+                error_str = str(e).lower()
+                if "429" in error_str or "quota" in error_str or "resource_exhausted" in error_str or "503" in error_str:
+                    wait_time = retry_delay * (2 ** attempt)
+                    logger.warning(f"Rate limit hit. Retrying in {wait_time}s...")
+                    import time
+                    time.sleep(wait_time)
+                    continue
+                raise e
 
-                # Add source information
-                procedure_data['source_requirement'] = result.get('requirement_id', result.get('node_id', ''))
-                procedure_data['confidence_score'] = result.get('relevance_score', 0.0)
+        # Parse Batch Response
+        try:
+            import re
+            json_match = re.search(r'\[[\s\S]*\]', content)
+            if json_match:
+                test_procedures = json.loads(json_match.group())
+            else:
+                # Try simple JSON load if no list brackets found (maybe it returned a single object wrapped or not)
+                test_procedures = [json.loads(content)] if content.strip().startswith('{') else []
+                if not test_procedures: 
+                     logger.error(f"Could not parse JSON list: {content[:100]}")
 
-                test_procedures.append(procedure_data)
+        except json.JSONDecodeError:
+            logger.error(f"JSON parsing failed for batch response")
 
-                # Extract acceptance criteria
-                if 'acceptance_criteria' in procedure_data:
+        # Post-process to add source info
+        # We need to map back to sources. 
+        # Since LLM output might not preserve order perfectly, we rely on it including the source_requirement ID we asked for.
+        # But for simplicity in this batch, we can assume order or just use the generated content.
+        # Better: Ask LLM to include "source_id" in response.
+        
+        # Enforce source mapping (fallback to sequential if LLM missed IDs)
+        for i, proc in enumerate(test_procedures):
+            if i < len(results_to_process):
+                source = results_to_process[i]
+                proc['source_requirement'] = source.get('requirement_id', source.get('node_id', ''))
+                proc['confidence_score'] = source.get('relevance_score', 0.0)
+
+                # Robustness: Ensure traceability exists
+                # Extract from metadata or fallback to parsing ID
+                source_meta = source.get('metadata', {})
+                std = source_meta.get('source_standard', '')
+                clause = source_meta.get('source_clause', '')
+                
+                # Fallback: Parse ID "Standard::Clause::ReqID"
+                if not std and "::" in proc['source_requirement']:
+                    parts = proc['source_requirement'].split("::")
+                    if len(parts) >= 2:
+                        std = parts[0]
+                        clause = parts[1]
+
+                if 'traceability' not in proc:
+                    proc['traceability'] = {
+                        "requirement_id": proc['source_requirement'],
+                        "source_clause": clause,
+                        "source_standard": std
+                    }
+                else:
+                    # If LLM returned partial traceability, fill gaps
+                    if not proc['traceability'].get('source_standard'):
+                        proc['traceability']['source_standard'] = std
+                    if not proc['traceability'].get('source_clause'):
+                        proc['traceability']['source_clause'] = clause
+                
+                # Create AC
+                if 'acceptance_criteria' in proc:
                     acceptance_criteria.append({
-                        'criteria_id': f"AC_{idx+1}",
-                        'test_id': f"B{idx+1}",
-                        'criteria_text': procedure_data['acceptance_criteria'],
-                        'source_requirement': procedure_data['source_requirement']
+                        'criteria_id': f"AC_{i+1}",
+                        'test_id': f"B{i+1}",
+                        'criteria_text': proc['acceptance_criteria'],
+                        'source_requirement': proc['source_requirement']
                     })
 
-                # Count tokens
-                total_tokens += tokens
-
-                # Update progress
-                llm_jobs[job_id]['current_step'] = f'Generating test procedures ({idx+1}/{len(results_to_process)})'
-                llm_jobs[job_id]['progress_percent'] = 20.0 + (70.0 * (idx+1) / len(results_to_process))
-
-                logger.info(f"Generated test procedure {idx+1}/{len(results_to_process)}")
-
-            except Exception as e:
-                logger.error(f"Failed to generate procedure for result {idx}: {e}")
-                continue
-
         # Update job status
+        result_payload = {
+            'test_procedures': test_procedures,
+            'acceptance_criteria': acceptance_criteria,
+            'tokens_used': tokens,
+            'procedures_generated': len(test_procedures),
+            'component_profile': request.component_profile.model_dump()
+        }
+        
+        llm_jobs[job_id]['result'] = result_payload
         llm_jobs[job_id]['status'] = JobStatus.COMPLETED
         llm_jobs[job_id]['current_step'] = 'Completed'
         llm_jobs[job_id]['progress_percent'] = 100.0
-        llm_jobs[job_id]['result'] = {
-            'test_procedures': test_procedures,
-            'acceptance_criteria': acceptance_criteria,
-            'tokens_used': total_tokens,
-            'procedures_generated': len(test_procedures)
-        }
 
-        logger.info(f"LLM generation job {job_id} completed: {len(test_procedures)} procedures")
+        if result_payload:
+             # Save to file for persistence
+            import os
+            from pathlib import Path
+            output_dir = Path("output")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Use centralized PTPGenerator
+            from app.api.v1.dvp import PTPGenerator
+            generator = PTPGenerator()
+            
+            # Save DOCX using existing project standard
+            try:
+                output_path = generator.generate_ptp_docx(
+                    component_profile=request.component_profile.model_dump(),
+                    test_cases=test_procedures,
+                    include_traceability=request.include_traceability
+                )
+                
+                # Add download URL to result
+                filename = Path(output_path).name
+                download_url = f"/static/output/{filename}"
+                llm_jobs[job_id]['result']['download_url'] = download_url
+                llm_jobs[job_id]['result']['file_name'] = filename
+                
+                logger.info(f"LLM generation job {job_id} completed. Saved to {output_path}")
+            except Exception as docx_err:
+                logger.warning(f"Could not save DOCX: {docx_err}")
 
     except Exception as e:
         logger.exception(f"LLM generation job {job_id} failed: {e}")
         llm_jobs[job_id]['status'] = JobStatus.FAILED
         llm_jobs[job_id]['error'] = str(e)
+
+
+
+
 
 # ==================== ENDPOINTS ====================
 
@@ -271,12 +387,19 @@ async def generate_test_procedures(
         'created_at': datetime.utcnow()
     }
 
-    # Start background processing
-    background_tasks.add_task(
-        process_llm_generation,
-        job_id,
-        request
-    )
+    # Start background processing based on method
+    if getattr(request, 'generation_method', 'llm') == 'deterministic':
+        background_tasks.add_task(
+            process_deterministic_generation,
+            job_id,
+            request
+        )
+    else:
+        background_tasks.add_task(
+            process_llm_generation,
+            job_id,
+            request
+        )
 
     return LLMGenerationResponse(
         job_id=job_id,
@@ -313,6 +436,184 @@ async def get_llm_generation_status(job_id: str):
         message=f"LLM generation: {job.get('current_step', 'Processing')}",
         result=job.get('result') if job['status'] == JobStatus.COMPLETED else None,
         error=job.get('error')
+    )
+
+async def process_deterministic_generation(job_id: str, request: LLMGenerationRequest):
+    """
+    Generates test plan deterministically (without LLM) using KG results directly.
+    """
+    try:
+        llm_jobs[job_id]['status'] = JobStatus.PROCESSING
+        llm_jobs[job_id]['current_step'] = 'Retrieving requirements'
+        llm_jobs[job_id]['progress_percent'] = 10.0
+
+        # 1. Retrieve Context from Knowledge Graph
+        from app.api.v1.retrieval import query_knowledge_graph
+        
+        if request.component_profile.test_categories:
+            cats = ", ".join(request.component_profile.test_categories)
+            query_str = f"Test requirements for {request.component_profile.name} {request.component_profile.type}. Categories: {cats}."
+        else:
+            query_str = f"Test requirements for {request.component_profile.name} {request.component_profile.type}."
+
+        query_request = RetrievalQueryRequest(
+            query_text=query_str,
+            n_results=100, # Get more candidates
+            min_confidence=0.4, # Lower threshold for deterministic
+            include_metadata=True,
+            component_profile=request.component_profile.model_dump()
+        )
+
+        response = await query_knowledge_graph(query_request)
+        results = response.results
+        
+        if not results:
+            logger.warning("No relevant nodes found in Knowledge Graph.")
+            llm_jobs[job_id]['status'] = JobStatus.FAILED
+            llm_jobs[job_id]['error'] = "No relevant requirements found in Knowledge Graph"
+            return
+
+        # 2. Limit results
+        results_to_process = results[:20]  # Process top 20 verified results
+        
+        test_procedures = []
+        acceptance_criteria = []
+
+        llm_jobs[job_id]['current_step'] = 'Formatting test procedures'
+        
+        for idx, result in enumerate(results_to_process):
+            # Deterministic Mapping
+            # Use Node text as requirement/description
+            req_text = result.get('text', '')
+            req_id = result.get('metadata', {}).get('source_clause', result.get('node_id', f'REQ_{idx}'))
+            
+            # Create a structured procedure object directly
+            
+            # Robust extraction of standard/clause
+            source_meta = result.get('metadata', {})
+            std = source_meta.get('source_standard', '')
+            clause = source_meta.get('source_clause', '')
+            
+            # Fallback: Parse ID "Standard::Clause::ReqID"
+            if not std and "::" in req_id:
+                parts = req_id.split("::")
+                if len(parts) >= 2:
+                    std = parts[0]
+                    clause = parts[1]
+
+            procedure_data = {
+                "test_name": f"Test for {req_id}",
+                "test_description": req_text[:200] + "..." if len(req_text) > 200 else req_text,
+                "detailed_procedure": [
+                    f"1. Setup the {request.component_profile.name} in the test chamber.",
+                    f"2. Configure test parameters according to {req_id}.",
+                    f"3. Verify: {req_text}",
+                    "4. Record observations and measurements.",
+                    "5. Fail if deviations are observed."
+                ],
+                "acceptance_criteria": f"Must comply with {req_id}: {req_text[:100]}...",
+                "source_requirement": req_id,
+                "confidence_score": result.get('relevance_score', 0.0),
+                "traceability": {
+                    "requirement_id": req_id,
+                    "source_clause": clause,
+                    "source_standard": std
+                }
+            }
+            
+            test_procedures.append(procedure_data)
+            
+            # AC
+            acceptance_criteria.append({
+                'criteria_id': f"AC_{idx+1}",
+                'test_id': f"B{idx+1}",
+                'criteria_text': procedure_data['acceptance_criteria'],
+                'source_requirement': req_id
+            })
+
+        # Save Result
+        result_payload = {
+            'test_procedures': test_procedures,
+            'acceptance_criteria': acceptance_criteria,
+            'tokens_used': 0,
+            'procedures_generated': len(test_procedures),
+            'component_profile': request.component_profile.model_dump()
+        }
+        
+        llm_jobs[job_id]['status'] = JobStatus.COMPLETED
+        llm_jobs[job_id]['current_step'] = 'Completed'
+        llm_jobs[job_id]['progress_percent'] = 100.0
+        llm_jobs[job_id]['result'] = result_payload
+
+        if result_payload:
+             # Save to file for persistence
+            import os
+            from pathlib import Path
+            output_dir = Path("output")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Use centralized PTPGenerator
+            from app.api.v1.dvp import PTPGenerator
+            generator = PTPGenerator()
+            
+            # Save DOCX using existing project standard
+            try:
+                output_path = generator.generate_ptp_docx(
+                    component_profile=request.component_profile.model_dump(),
+                    test_cases=test_procedures,
+                    include_traceability=request.include_traceability
+                )
+                
+                # Add download URL to result
+                filename = Path(output_path).name
+                download_url = f"/static/output/{filename}"
+                llm_jobs[job_id]['result']['download_url'] = download_url
+                llm_jobs[job_id]['result']['file_name'] = filename
+
+                logger.info(f"Deterministic generation job {job_id} completed. Saved to {output_path}")
+            except Exception as docx_err:
+                logger.warning(f"Could not save DOCX: {docx_err}")
+                logger.info(f"Deterministic generation job {job_id} completed (DOCX save failed).")
+
+    except Exception as e:
+        logger.exception(f"Deterministic generation job {job_id} failed: {e}")
+        llm_jobs[job_id]['status'] = JobStatus.FAILED
+        llm_jobs[job_id]['error'] = str(e)
+
+@router.post("/generate-deterministic", response_model=LLMGenerationResponse)
+async def generate_test_procedures_deterministic(
+    request: LLMGenerationRequest,
+    background_tasks: BackgroundTasks
+):
+    """
+    **Endpoint: Deterministic Generation (No LLM)**
+    Generates test procedures directly from Knowledge Graph retrieval results.
+    Fast, no rate limits, but less detailed than LLM generation.
+    """
+    job_id = str(uuid.uuid4())
+
+    llm_jobs[job_id] = {
+        'job_id': job_id,
+        'status': JobStatus.PENDING,
+        'current_step': 'Initializing',
+        'progress_percent': 0.0,
+        'created_at': datetime.utcnow()
+    }
+
+    background_tasks.add_task(
+        process_deterministic_generation,
+        job_id,
+        request
+    )
+
+    return LLMGenerationResponse(
+        job_id=job_id,
+        status=JobStatus.PENDING,
+        test_procedures=[],
+        acceptance_criteria=[],
+        tokens_used=0,
+        generation_time_seconds=0.0,
+        timestamp=datetime.utcnow()
     )
 
 @router.post("/generate-simple")

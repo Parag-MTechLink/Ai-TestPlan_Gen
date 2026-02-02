@@ -4,6 +4,7 @@ Main FastAPI application for Knowledge Graph DVP Generation System
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import uvicorn
 
@@ -109,6 +110,9 @@ app.include_router(
     prefix="/api/v1/visualization",
     tags=["Visualization"]
 )
+
+# Mount static files
+app.mount("/static/output", StaticFiles(directory=settings.output_dir), name="output")
 
 # Root endpoint
 @app.get("/")

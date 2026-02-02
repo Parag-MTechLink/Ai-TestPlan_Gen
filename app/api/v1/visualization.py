@@ -1010,8 +1010,12 @@ async def query_interface():
                     📊 Load All Nodes
                 </button>
 
-                <button class="btn btn-success" onclick="exportToExcel()">
+                <button class="btn btn-success" onclick="exportToExcel('xlsx')">
                     📥 Export to Excel
+                </button>
+
+                <button class="btn btn-primary" onclick="exportToExcel('docx')" style="margin-top: 10px; background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);">
+                    📄 Export to Word
                 </button>
             </div>
 
@@ -1364,7 +1368,7 @@ async def query_interface():
             document.getElementById('nodeModal').style.display = 'none';
         }
 
-        async function exportToExcel() {
+        async function exportToExcel(format = 'xlsx') {
             if (queryResultsData.length === 0 && allNodesData.length === 0) {
                 alert('Please query the graph or load nodes first before exporting.');
                 return;
@@ -1411,7 +1415,7 @@ async def query_interface():
                     quantity_per_test: {"Sample": 5}
                 },
                 test_cases: testCases,
-                output_format: "xlsx",
+                output_format: format,
                 include_traceability_sheet: true,
                 include_visualization: false
             };
@@ -1426,7 +1430,8 @@ async def query_interface():
                 const data = await response.json();
 
                 if (data.job_id) {
-                    alert('Excel generation started! Job ID: ' + data.job_id + '\\n\\nCheck /api/v1/dvp/list for download link.');
+                    const formatName = format === 'docx' ? 'Word' : 'Excel';
+                    alert(formatName + ' generation started! Job ID: ' + data.job_id + '\\n\\nCheck /api/v1/dvp/list for download link.');
 
                     // Poll for completion
                     setTimeout(async () => {

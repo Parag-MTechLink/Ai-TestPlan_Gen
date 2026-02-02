@@ -114,6 +114,7 @@ class LLMGenerationRequest(BaseModel):
     retrieved_context: List[Dict[str, Any]]
     component_profile: ComponentProfileRequest
     generation_mode: str = Field(default="detailed", description="brief, detailed, comprehensive")
+    generation_method: str = Field(default="llm", description="Method: 'llm' or 'deterministic'")
     include_traceability: bool = Field(default=True)
 
 class DVPGenerationRequest(BaseModel):

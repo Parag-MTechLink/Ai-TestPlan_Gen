@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Any
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 from app.models.api_models import (
     RetrievalQueryRequest,
@@ -20,27 +21,36 @@ async def query_knowledge_graph(request: RetrievalQueryRequest):
     """
     **Endpoint 3: Query Knowledge Graph for Relevant Context**
 
-    Retrieves relevant requirements using keyword-based graph search.
+    Retrieves relevant requirements using hybrid search (Semantic + Keyword).
 
     **Search Methods:**
-    1. **Keyword**: Text-based matching in requirement text
-    2. **Graph**: Hierarchical traversal and reference following
-
-    **Example:**
-    ```json
-    {
-        "component_profile": {
-            "name": "LED Module",
-            "type": "LED Module",
-            "test_categories": ["thermal", "mechanical"]
-        },
-        "retrieval_method": "hybrid",
-        "max_results": 50,
-        "min_confidence": 0.1
-    }
-    ```
+    1. **Semantic**: Vector similarity using Sentence Transformers (ChromaDB)
+    2. **Keyword**: Text-based matching in requirement text
+    
+    The results are combined and reranked.
     """
-    from app.api.v1.graph import graph_builder
+    from app.api.v1.graph import graph_builder, search_engine, load_existing_graph
+
+    if not graph_builder:
+        # Try to auto-load if not loaded (basic recovery)
+        try:
+            import os
+            # Find latest graph
+            graph_dir = Path("graph_data")
+            if graph_dir.exists():
+                pkl_files = list(graph_dir.glob("*.pkl"))
+                if pkl_files:
+                    latest_graph = max(pkl_files, key=os.path.getctime)
+                    job_id = latest_graph.stem
+                    logger.info(f"Auto-loading graph {job_id} for retrieval...")
+                    
+                    # Await the load function
+                    await load_existing_graph(job_id)
+                    
+                    # Refresh references
+                    from app.api.v1.graph import graph_builder, search_engine
+        except Exception as e:
+            logger.warning(f"Could not auto-load graph: {e}")
 
     if not graph_builder:
         raise HTTPException(
@@ -54,6 +64,32 @@ async def query_knowledge_graph(request: RetrievalQueryRequest):
     try:
         # Build search keywords from component profile
         component = request.component_profile
+        
+        # 1. Semantic Search Query Construction
+        # Create a natural language query representing what we are looking for
+        query_text = f"Test requirements for {component.type} used in {component.application} application. "
+        query_text += f"Test level: {component.test_level}. "
+        query_text += f"Categories: {', '.join(component.test_categories)}. "
+        if component.specifications:
+            query_text += f"Specs: {', '.join([f'{k}={v}' for k,v in component.specifications.items()])}"
+            
+        logger.info(f"Semantic Query: {query_text}")
+
+        # Execute Semantic Search
+        semantic_results = {}
+        if search_engine:
+            try:
+                # We search for more results than requested to allow for filtering
+                sem_hits = search_engine.search_requirements(query_text, n_results=max(100, request.max_results * 2))
+                for hit in sem_hits:
+                    semantic_results[hit['node_id']] = hit
+                logger.info(f"Semantic search returned {len(sem_hits)} hits")
+            except Exception as e:
+                logger.error(f"Semantic search failed: {e}")
+        else:
+            logger.warning("Search engine not initialized. Skipping semantic search.")
+
+        # 2. Keyword Search Construction
         search_terms = []
         search_terms.extend(component.type.lower().split())
         search_terms.extend(component.application.lower().split())
@@ -61,23 +97,53 @@ async def query_knowledge_graph(request: RetrievalQueryRequest):
 
         # Add common test-related keywords
         keyword_map = {
-            'thermal': ['temperature', 'heat', 'thermal', 'cold', 'hot', 'celsius', '°c'],
-            'mechanical': ['vibration', 'shock', 'mechanical', 'force', 'stress'],
-            'environmental': ['humidity', 'water', 'dust', 'environment', 'climate', 'moisture'],
-            'electrical': ['voltage', 'current', 'electrical', 'power', 'resistance', 'insulation'],
-            'emc': ['emc', 'electromagnetic', 'interference', 'emission', 'immunity'],
-            'durability': ['durability', 'life', 'cycle', 'endurance', 'aging']
+            'thermal': ['temperature', 'heat', 'thermal', 'cold', 'hot', 'celsius', '°c', 'climate', 'shock'],
+            'mechanical': ['vibration', 'shock', 'mechanical', 'force', 'stress', 'impact', 'drop'],
+            'environmental': ['humidity', 'water', 'dust', 'environment', 'climate', 'moisture', 'salt', 'corrosion', 'ingress'],
+            'electrical': ['voltage', 'current', 'electrical', 'power', 'resistance', 'insulation', 'dielectric', 'short'],
+            'emc': ['emc', 'electromagnetic', 'interference', 'emission', 'immunity', 'electrostatic', 'esd', 'conducted', 'radiated'],
+            'durability': ['durability', 'life', 'cycle', 'endurance', 'aging', 'wear']
         }
 
         for cat in component.test_categories:
             if cat.lower() in keyword_map:
                 search_terms.extend(keyword_map[cat.lower()])
+        
+        # Clean unique terms
+        search_terms = list(set([t.lower() for t in search_terms if len(t) > 2]))
+        logger.info(f"Keyword Search terms: {search_terms}")
 
-        logger.info(f"Search terms: {search_terms}")
+        # 3. Hybrid Merge and Scoring
+        combined_results = {}
+        
+        # Helper to get existing entry or create new
+        def get_or_create_result(node_id, node_data):
+            if node_id not in combined_results:
+                combined_results[node_id] = {
+                    'node_id': node_id,
+                    'node_type': 'Requirement',
+                    'requirement_id': node_id,
+                    'requirement_type': node_data.get('requirement_type', 'mandatory'),
+                    'text': node_data.get('text', ''),
+                    'keyword': node_data.get('keyword', 'shall'),
+                    'parent_clause': node_data.get('parent_clause', ''),
+                    'semantic_score': 0.0,
+                    'keyword_score': 0.0,
+                    'matched_terms': [],
+                    'retrieval_method': 'hybrid'
+                }
+            return combined_results[node_id]
 
-        # Search through all requirement nodes
-        all_results = []
+        # Process Semantic Results
+        start_time = datetime.utcnow()
+        for node_id, hit in semantic_results.items():
+            if graph_builder.graph.has_node(node_id):
+                node_data = graph_builder.graph.nodes[node_id]
+                res = get_or_create_result(node_id, node_data)
+                res['semantic_score'] = hit['relevance_score']
 
+        # Process Keyword Search (Scan all nodes - naive but effective for small graphs < 10k nodes)
+        # For larger graphs, we would rely more on semantic search or inverted index
         for node_id, node_data in graph_builder.graph.nodes(data=True):
             if node_data.get('node_type') != 'Requirement':
                 continue
@@ -89,39 +155,63 @@ async def query_knowledge_graph(request: RetrievalQueryRequest):
 
             # Calculate relevance score based on keyword matches
             matches = 0
-            matched_terms = []
+            curr_matched_terms = []
             for term in search_terms:
                 if term in req_text:
                     matches += 1
-                    matched_terms.append(term)
-
+                    curr_matched_terms.append(term)
+            
             if matches > 0:
-                # Score based on number of matches relative to search terms
-                relevance_score = min(1.0, matches / (len(search_terms) * 0.3))
-
-                # Boost score for mandatory requirements
+                # Get or create result (might exist from semantic)
+                res = get_or_create_result(node_id, node_data)
+                
+                # Normalize keyword score. 
+                # Assuming 5 matches is "very good" (1.0).
+                # New formula: Score = matches / 6.0, cap at 1.0
+                k_score = min(1.0, matches / 6.0)
+                
+                # Boost if mandatory
                 if node_data.get('requirement_type') == 'mandatory':
-                    relevance_score = min(1.0, relevance_score * 1.2)
+                    k_score = min(1.0, k_score * 1.2)
+                
+                res['keyword_score'] = k_score
+                res['matched_terms'] = curr_matched_terms
 
-                if relevance_score >= request.min_confidence:
-                    all_results.append({
-                        'node_id': node_id,
-                        'node_type': 'Requirement',
-                        'requirement_id': node_id,
-                        'requirement_type': node_data.get('requirement_type', 'mandatory'),
-                        'text': node_data.get('text', ''),
-                        'keyword': node_data.get('keyword', 'shall'),
-                        'parent_clause': node_data.get('parent_clause', ''),
-                        'relevance_score': round(relevance_score, 3),
-                        'matched_terms': matched_terms,
-                        'retrieval_method': 'keyword'
-                    })
+        # 4. Final Scoring and Ranking
+        final_list = []
+        for res in combined_results.values():
+            # Hybrid Score Formula:
+            # If both exist: weighted average + boost
+            # If only one: use that score * penalty
+            
+            s_score = res['semantic_score']
+            k_score = res['keyword_score']
+            
+            final_score = 0.0
+            
+            if s_score > 0 and k_score > 0:
+                # Reinforcement: high semantic AND keyword match
+                final_score = (0.6 * s_score) + (0.4 * k_score) + 0.1 # Boost for dual match
+            elif s_score > 0:
+                # Only semantic (maybe vocabulary mismatch)
+                final_score = s_score * 0.9 
+            elif k_score > 0:
+                # Only keyword (maybe specific technical term)
+                final_score = k_score * 0.8
+            
+            final_score = min(1.0, final_score)
+            res['relevance_score'] = round(final_score, 3)
+            
+            if final_score >= request.min_confidence:
+                final_list.append(res)
 
         # Sort by relevance score
-        all_results.sort(key=lambda x: x['relevance_score'], reverse=True)
+        final_list.sort(key=lambda x: x['relevance_score'], reverse=True)
 
         # Limit results
-        final_results = all_results[:request.max_results]
+        final_results = final_list[:request.max_results]
+        
+        logger.info(f"Retrieval complete. Found {len(final_results)} items (Total candidates: {len(combined_results)})")
 
         return RetrievalResponse(
             job_id=job_id,
@@ -132,9 +222,10 @@ async def query_knowledge_graph(request: RetrievalQueryRequest):
             retrieval_metadata={
                 'search_terms': search_terms,
                 'total_requirements_searched': sum(1 for _, d in graph_builder.graph.nodes(data=True) if d.get('node_type') == 'Requirement'),
-                'matches_found': len(all_results),
+                'candidates_found': len(combined_results),
                 'filtered_by_confidence': request.min_confidence,
-                'retrieval_method': 'keyword'
+                'semantic_hits': len(semantic_results),
+                'retrieval_method': 'hybrid'
             },
             timestamp=datetime.utcnow()
         )

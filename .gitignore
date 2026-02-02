@@ -212,3 +212,6 @@ __marimo__/
 *.sqlite
 temp/
 chroma_db/
+
+output/
+graph_data/
