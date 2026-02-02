@@ -1,0 +1,35 @@
+{
+  "chunk_id": "IEC_61076_8_103_2023::4.1.1",
+  "document_id": "IEC_61076_8_103_2023",
+  "clause_id": "4.1.1",
+  "title": "General",
+  "parent_id": "4.1",
+  "content": [
+    {
+      "type": "paragraph",
+      "text": "According to IEC 60352 series or IEC 60999-1."
+    },
+    {
+      "type": "paragraph",
+      "text": "Conformément à la série IEC 60352 ou à l'IEC 60999-1."
+    }
+  ],
+  "tables": [],
+  "figures": [],
+  "requirements": [],
+  "references": {
+    "internal_raw": [
+      "1",
+      "60352",
+      "60999"
+    ],
+    "internal_resolved": [
+      "IEC_61076_8_103_2023::1"
+    ],
+    "standards": [
+      "IEC 60352",
+      "IEC 60999-1"
+    ]
+  },
+  "children_ids": []
+}

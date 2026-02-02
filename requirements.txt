@@ -16,3 +16,5 @@ chromadb
 sentence-transformers
 pytest
 pytest-asyncio
+google-genai
+python-docx
