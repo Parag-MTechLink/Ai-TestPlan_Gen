@@ -131,10 +131,31 @@ curl -X POST http://localhost:8080/api/v1/ingest/local
 curl http://localhost:8080/api/v1/ingest/status/{job_id}
 
 # 3. Build graph (use job_id from step 1)
-curl -X POST http://localhost:8080/api/v1/graph/build \
-  -H "Content-Type: application/json" \
   -d '{"ingestion_job_id": "{job_id}", "enable_structural_links": true, "enable_semantic_links": false, "enable_reference_links": true}'
 ```
+
+---
+
+### Automated Workflow
+
+You can also run the ingestion and graph building workflow automatically.
+
+#### Option 1: On Server Startup
+The system is configured to automatically run the ingestion and graph build process in the background when you start the server using `uvicorn`.
+
+#### Option 2: Manual Trigger (Script)
+You can trigger the workflow manually from any environment (terminal, IDE, CI/CD) by running the automation script:
+
+```bash
+python app/utils/automation.py
+```
+
+This script will:
+1. Wait for the server to be ready.
+2. Trigger data ingestion.
+3. Poll for completion.
+4. Trigger the graph build.
+
 
 ### Step 7: Open the Query UI
 

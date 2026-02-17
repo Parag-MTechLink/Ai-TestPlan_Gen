@@ -37,7 +37,15 @@ async def lifespan(app: FastAPI):
     logger.info(f"Graph storage: {settings.graph_storage_path}")
 
     # Initialize services
-    # (Add any startup initialization here)
+    # Initialize services
+    import threading
+    from app.utils.automation import run_ingestion_workflow
+
+    # Start ingestion workflow in background
+    ingestion_thread = threading.Thread(target=run_ingestion_workflow)
+    ingestion_thread.daemon = True
+    ingestion_thread.start()
+
 
     yield
 
