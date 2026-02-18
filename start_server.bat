@@ -18,10 +18,10 @@ if not exist "venv\" (
 echo.
 echo Starting FastAPI server...
 echo.
-echo API Documentation: http://localhost:8000/docs
-echo Health Check: http://localhost:8000/health
+echo API Documentation: http://localhost:8080/docs
+echo Health Check: http://localhost:8080/health
 echo.
 
-python -m app.main
+python -m src.main
 
 pause
